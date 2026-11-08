@@ -261,7 +261,7 @@ insert into _seed_foods values
 insert into public.foods (user_id, name, brand, source, source_id, basis, kcal, protein_g, carbs_g, fat_g, fiber_g, sugar_g, sat_fat_g, sodium_mg)
 select null, s.name, s.brand, 'seed', s.sid, s.basis, s.kcal, s.p, s.c, s.f, s.fiber, s.sugar, s.sat, s.na
 from _seed_foods s
-on conflict (source, source_id) where user_id is null and source_id is not null do nothing;
+on conflict do nothing;
 
 insert into public.food_servings (food_id, user_id, name, grams, is_default, position)
 select f.id, null, srv.value ->> 0, (srv.value ->> 1)::numeric, srv.ordinality = 1, (srv.ordinality - 1)::smallint

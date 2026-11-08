@@ -49,7 +49,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <SerwistProvider swUrl="/serwist/sw.js" disable={process.env.NODE_ENV !== "production"} reloadOnOnline={false}>
           {children}
         </SerwistProvider>
-        <Toaster position="top-center" richColors closeButton={false} toastOptions={{ className: "!rounded-2xl" }} offset={{ top: "calc(env(safe-area-inset-top) + 8px)" }} mobileOffset={{ top: "calc(env(safe-area-inset-top) + 8px)" }} />
+        <Toaster
+          position="bottom-center"
+          richColors
+          closeButton={false}
+          toastOptions={{ className: "!rounded-2xl" }}
+          offset={{ bottom: "calc(env(safe-area-inset-bottom) + 76px)" }}
+          mobileOffset={{ bottom: "calc(env(safe-area-inset-bottom) + 76px)" }}
+        />
       </PersistQueryClientProvider>
     </ThemeProvider>
   );

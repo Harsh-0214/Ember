@@ -1,3 +1,11 @@
-export default function Page() {
-  return <main className="px-4 pt-safe"><h1 className="pt-4 text-2xl font-bold capitalize">today</h1></main>;
+import { Suspense } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { TodayScreen } from "@/components/today/today-screen";
+
+export default function TodayPage() {
+  return (
+    <Suspense fallback={<div className="grid gap-4 p-4 pt-16"><Skeleton className="h-64" /><Skeleton className="h-28" /></div>}>
+      <TodayScreen />
+    </Suspense>
+  );
 }

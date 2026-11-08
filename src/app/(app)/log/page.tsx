@@ -1,3 +1,13 @@
-export default function Page() {
-  return <main className="px-4 pt-safe"><h1 className="pt-4 text-2xl font-bold capitalize">log</h1></main>;
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import { LogScreen } from "@/components/log/log-screen";
+
+export const metadata: Metadata = { title: "Log food" };
+
+export default function LogPage() {
+  return (
+    <Suspense>
+      <LogScreen />
+    </Suspense>
+  );
 }

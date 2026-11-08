@@ -21,3 +21,13 @@ export function dailyBudget(baseKcal: number, netExerciseKcal: number, s: Exerci
   const exerciseCredit = s.enabled ? Math.round((Math.max(0, netExerciseKcal) * pct) / 100) : 0;
   return { baseKcal, exerciseCredit, budgetKcal: baseKcal + exerciseCredit };
 }
+
+/**
+ * Converts gross workout calories to net (above resting) by removing the
+ * resting energy you'd have burned anyway during that time.
+ */
+export function netExerciseKcal(grossKcal: number, minutes: number | null, bmrPerDay: number): number {
+  if (!Number.isFinite(grossKcal) || grossKcal <= 0) return 0;
+  const resting = minutes && minutes > 0 ? (bmrPerDay / 1440) * minutes : 0;
+  return Math.max(0, Math.round(grossKcal - resting));
+}

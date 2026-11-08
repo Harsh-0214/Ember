@@ -1,3 +1,7 @@
+import { ComingSoon } from "@/components/shell/coming-soon";
+
+export const metadata = { title: "Progress" };
+
 export default function Page() {
-  return <main className="px-4 pt-safe"><h1 className="pt-4 text-2xl font-bold capitalize">progress</h1></main>;
+  return <ComingSoon title="Progress" back="/" body="Weight trend, calories vs target, adherence, PRs and progress photos." />;
 }

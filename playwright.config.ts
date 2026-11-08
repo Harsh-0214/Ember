@@ -16,7 +16,17 @@ export default defineConfig({
     baseURL: process.env.E2E_BASE_URL ?? "http://localhost:3100",
     trace: "off",
   },
-  projects: [{ name: "iphone", use: { ...devices["iPhone 13"], browserName: "chromium" } }],
+  projects: [
+    {
+      name: "iphone",
+      use: {
+        ...devices["iPhone 13"],
+        browserName: "chromium",
+        // Optional: point at a pre-installed Chromium (e.g. PW_CHROMIUM_PATH=/opt/pw-browsers/chromium)
+        launchOptions: process.env.PW_CHROMIUM_PATH ? { executablePath: process.env.PW_CHROMIUM_PATH } : {},
+      },
+    },
+  ],
   webServer: process.env.E2E_BASE_URL
     ? undefined
     : { command: "npx next start -p 3100", port: 3100, reuseExistingServer: true, timeout: 120_000 },

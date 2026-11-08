@@ -52,7 +52,7 @@ The tables are `profiles`, `goals`, `foods`, `food_servings`, `recipes`, `recipe
 
 ## Progress
 - [x] Phase 1 — scaffold, schema + RLS + seed (validated in PGlite), auth (password + magic link), PWA shell (Serwist via `@serwist/turbopack`, manifest, icons, iOS meta), design tokens + UI primitives, `lib/nutrition`, `lib/units`, `lib/dates` with tests
-- [ ] Phase 2
+- [x] Phase 2: onboarding wizard (one question per screen, rate safety, editable targets); Today (calorie ring, macro bars, meals with swipe-to-delete + undo and tap-to-edit, water, Health card, editable weigh-in, insight line, day complete/fasted flags, swipe between days); unified food search (recents/frequent/favourites, then my foods and the cache, then USDA + OFF online, debounced) with a serving picker and live macro preview; server-side online food caching; custom foods; quick add; settings (targets, exercise-calorie mode, units, theme, meals, timezone, water goal, profile). e2e tests run against a local mock Supabase (`scripts/e2e-mock.sh`).
 - [ ] Phase 3
 - [ ] Phase 4
 - [ ] Phase 5
@@ -61,6 +61,12 @@ The tables are `profiles`, `goals`, `foods`, `food_servings`, `recipes`, `recipe
 - [ ] Phase 8
 
 ## Assumptions & decisions
+- Onboarding asks for **units first** (pre-selected from the browser locale), so height and weight are entered in your own units.
+- Logging a common food: tap **+** on the meal → tap a recent food's **+** (repeats the last amount) = **2 taps**. Or tap the food → **Add** = 3 taps.
+- Online foods are cached by the server: it re-fetches by source id and never trusts nutrition values sent from the client. If caching fails, the entry is still logged with a nutrition snapshot.
+- Diary entries store a nutrient snapshot, so editing a food later never rewrites history.
+- Toasts appear at the bottom, above the tab bar, so they never cover header actions.
+- `scripts/mock-supabase.mjs` implements the subset of GoTrue/PostgREST that Ember uses, on top of PGlite with the real migrations. It's used for screenshots and e2e tests where no Supabase project is available. It is never used by the app itself.
 - **No live keys in the build environment** (you chose this at the setup stop). `src/types/database.ts` is generated from the migrations with `npm run db:types:local` (an in-memory Postgres via PGlite). Once you've linked the project, `npm run db:types` regenerates it from the hosted DB. `npm run db:check` applies all migrations to PGlite and runs smoke checks, including that every table has RLS.
 - **Cache Components is off.** `@serwist/turbopack` builds the service worker in a route handler that needs classic segment config. The app is client-data-driven anyway (TanStack Query, persisted to localStorage for instant and offline cold starts).
 - Next 16 renamed Middleware to **Proxy** (`src/proxy.ts`). It refreshes the Supabase session and redirects signed-out users to `/login`. If Supabase env vars are missing, it redirects to `/setup` instead of crashing.

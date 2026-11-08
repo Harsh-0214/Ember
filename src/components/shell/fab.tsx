@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Droplet, Dumbbell, Plus, ScanBarcode, Scale, Utensils, Zap } from "lucide-react";
 import { Sheet } from "@/components/ui/drawer";
@@ -15,6 +16,9 @@ const ACTIONS = [
 
 export function Fab() {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+  // Hidden on screens that are already about adding things
+  if (/^\/(log|foods|settings|onboarding|exercise\/new|recipes\/)/.test(pathname)) return null;
   return (
     <>
       <button

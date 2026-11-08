@@ -294,3 +294,12 @@ describe("budget & nutrients", () => {
     expect(macrosConsistent({ kcal: 500, protein_g: 1, carbs_g: 1, fat_g: 1 })).toBe(false);
   });
 });
+
+import { netExerciseKcal } from ".";
+describe("net exercise calories", () => {
+  it("removes resting energy over the workout duration", () => {
+    expect(netExerciseKcal(400, 60, 1800)).toBe(325);
+    expect(netExerciseKcal(400, null, 1800)).toBe(400);
+    expect(netExerciseKcal(50, 600, 1800)).toBe(0);
+  });
+});
