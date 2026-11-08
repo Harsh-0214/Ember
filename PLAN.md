@@ -51,7 +51,7 @@ The tables are `profiles`, `goals`, `foods`, `food_servings`, `recipes`, `recipe
 8. (Optional, needs `ANTHROPIC_API_KEY`) natural-language and photo food logging via Claude
 
 ## Progress
-- [ ] Phase 1
+- [x] Phase 1 — scaffold, schema + RLS + seed (validated in PGlite), auth (password + magic link), PWA shell (Serwist via `@serwist/turbopack`, manifest, icons, iOS meta), design tokens + UI primitives, `lib/nutrition`, `lib/units`, `lib/dates` with tests
 - [ ] Phase 2
 - [ ] Phase 3
 - [ ] Phase 4
@@ -61,6 +61,15 @@ The tables are `profiles`, `goals`, `foods`, `food_servings`, `recipes`, `recipe
 - [ ] Phase 8
 
 ## Assumptions & decisions
+- **No live keys in the build environment** (you chose this at the setup stop). `src/types/database.ts` is generated from the migrations with `npm run db:types:local` (an in-memory Postgres via PGlite). Once you've linked the project, `npm run db:types` regenerates it from the hosted DB. `npm run db:check` applies all migrations to PGlite and runs smoke checks, including that every table has RLS.
+- **Cache Components is off.** `@serwist/turbopack` builds the service worker in a route handler that needs classic segment config. The app is client-data-driven anyway (TanStack Query, persisted to localStorage for instant and offline cold starts).
+- Next 16 renamed Middleware to **Proxy** (`src/proxy.ts`). It refreshes the Supabase session and redirects signed-out users to `/login`. If Supabase env vars are missing, it redirects to `/setup` instead of crashing.
+- Seeds live in a migration (`20261108000100_seed.sql`), so `supabase db push` applies them. They are idempotent.
+- Each recipe also gets a linked `foods` row (`source = 'recipe'`), so recipes are searchable and logged through the same pipeline as any food.
+- Exercise calories that are added to the budget use **net** MET calories ((MET − 1) × kg × h), because resting energy is already in BMR.
+- Protein for weight loss is computed from the midpoint between current and goal weight, so people with higher body fat aren't given excessive targets.
+- Rate guidance: lose 0.25–1 % of body weight per week (aggressive above 1 %, too aggressive above 1.5 %); gain 0.1–0.5 %/week.
+- Adaptive TDEE needs at least 14 qualifying days and 6 weigh-ins in the 28-day window. The blend weight ramps from 25 % to 100 % between 14 and 28 days and is scaled by confidence. It is clamped to ±150 kcal per week, and implausible results are bounded to 60–160 % of the formula value.
 - The cloud build environment can't see your local `.env.local`, so code is written against env vars with graceful fallbacks. Tests that need a live Supabase (e2e) skip themselves unless the keys are present.
 - Mutations use route handlers rather than server actions, so the offline outbox can replay them.
 - Rate limiting uses a Postgres fixed-window counter (`rate_limit_hit` RPC), because Vercel Hobby has no Redis.

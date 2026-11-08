@@ -6,7 +6,17 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   // Override default ignores of eslint-config-next.
+  {
+    rules: {
+      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
+    },
+  },
   globalIgnores([
+    "public/**",
+    "playwright-report/**",
+    "test-results/**",
+    "supabase/functions/**",
     // Default ignores of eslint-config-next:
     ".next/**",
     "out/**",
