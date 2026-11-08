@@ -75,6 +75,7 @@ export function FoodForm({ food, initialName, initialBarcode, afterSaveHref }: {
     try {
       const res = food ? await api.patch<{ food: FoodWithServings }>(`/api/foods/${food.id}`, parsed.data) : await api.post<{ food: FoodWithServings }>("/api/foods", parsed.data);
       qc.setQueryData(qk.food(res.food.id), res.food);
+      qc.setQueryData<FoodWithServings[]>(qk.myFoods, (old) => [res.food, ...(old ?? []).filter((f) => f.id !== res.food.id)]);
       void qc.invalidateQueries({ queryKey: qk.myFoods });
       void qc.invalidateQueries({ queryKey: ["foods-local"] });
       toast.success(food ? "Food updated" : "Food created");

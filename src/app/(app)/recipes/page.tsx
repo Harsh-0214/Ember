@@ -1,7 +1,7 @@
-import { ComingSoon } from "@/components/shell/coming-soon";
+import { RecipesScreen } from "@/components/recipes/recipes-screen";
 
 export const metadata = { title: "Recipes & meals" };
 
-export default function Page() {
-  return <ComingSoon title="Recipes & meals" back="/more" body="Recipes with per-serving macros and one-tap saved meals." />;
+export default function RecipesPage() {
+  return <RecipesScreen />;
 }

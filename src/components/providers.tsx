@@ -45,6 +45,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
           maxAge: 1000 * 60 * 60 * 24 * 7,
           dehydrateOptions: { shouldDehydrateQuery: (q) => q.state.status === "success" && q.queryKey[0] !== "search" },
         }}
+        // Persisted data paints instantly; then everything is revalidated, since the
+        // snapshot may predate the last writes (writes are throttled, iOS can kill the app).
+        onSuccess={() => void client.invalidateQueries()}
       >
         <SerwistProvider swUrl="/serwist/sw.js" disable={process.env.NODE_ENV !== "production"} reloadOnOnline={false}>
           {children}

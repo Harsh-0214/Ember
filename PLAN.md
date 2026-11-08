@@ -53,7 +53,7 @@ The tables are `profiles`, `goals`, `foods`, `food_servings`, `recipes`, `recipe
 ## Progress
 - [x] Phase 1 — scaffold, schema + RLS + seed (validated in PGlite), auth (password + magic link), PWA shell (Serwist via `@serwist/turbopack`, manifest, icons, iOS meta), design tokens + UI primitives, `lib/nutrition`, `lib/units`, `lib/dates` with tests
 - [x] Phase 2: onboarding wizard (one question per screen, rate safety, editable targets); Today (calorie ring, macro bars, meals with swipe-to-delete + undo and tap-to-edit, water, Health card, editable weigh-in, insight line, day complete/fasted flags, swipe between days); unified food search (recents/frequent/favourites, then my foods and the cache, then USDA + OFF online, debounced) with a serving picker and live macro preview; server-side online food caching; custom foods; quick add; settings (targets, exercise-calorie mode, units, theme, meals, timezone, water goal, profile). e2e tests run against a local mock Supabase (`scripts/e2e-mock.sh`).
-- [ ] Phase 3
+- [x] Phase 3: barcode scanning (`@zxing/browser`, lazy-loaded, torch, double-read/check-digit guard, manual entry). Lookup order is local cache (all UPC/EAN variants) → Open Food Facts → "add this product" form that saves the barcode. Recipes (ingredients, servings, cooked weight, per-serving macros, linked searchable food). Saved meals (save from any meal, one-tap log from search or "Mine"). Copy yesterday's meal or a meal from any day. "Copy previous day" on empty days. Custom water amounts.
 - [ ] Phase 4
 - [ ] Phase 5
 - [ ] Phase 6
@@ -61,6 +61,10 @@ The tables are `profiles`, `goals`, `foods`, `food_servings`, `recipes`, `recipe
 - [ ] Phase 8
 
 ## Assumptions & decisions
+- The persisted TanStack cache paints instantly, then every query is revalidated after restore (writes are throttled, and iOS can kill the app before a write lands).
+- Barcode reads must repeat twice, or pass the GS1 check digit, before they're accepted. This avoids misreads.
+- Recipe per-100 g values use the cooked weight when you enter one (water loss concentrates nutrients). Otherwise they use the sum of the raw ingredients.
+- Copying entries creates new rows with fresh ids and nutrient snapshots. Saved meals store snapshots too, so they still work if a source food changes.
 - Onboarding asks for **units first** (pre-selected from the browser locale), so height and weight are entered in your own units.
 - Logging a common food: tap **+** on the meal → tap a recent food's **+** (repeats the last amount) = **2 taps**. Or tap the food → **Add** = 3 taps.
 - Online foods are cached by the server: it re-fetches by source id and never trusts nutrition values sent from the client. If caching fails, the entry is still logged with a nutrition snapshot.

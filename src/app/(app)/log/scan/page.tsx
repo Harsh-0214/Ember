@@ -1,7 +1,12 @@
-import { ComingSoon } from "@/components/shell/coming-soon";
+import { Suspense } from "react";
+import { ScanScreen } from "@/components/scan/scan-screen";
 
 export const metadata = { title: "Scan barcode" };
 
-export default function Page() {
-  return <ComingSoon title="Scan barcode" back="/log" body="Camera barcode scanning for packaged foods." />;
+export default function ScanPage() {
+  return (
+    <Suspense>
+      <ScanScreen />
+    </Suspense>
+  );
 }

@@ -18,3 +18,9 @@ export const qk = {
   health: (date: string) => ["health", date] as const,
   lastSync: ["last-sync"] as const,
 };
+
+export const qk2 = {
+  recipes: ["recipes"] as const,
+  recipe: (id: string) => ["recipe", id] as const,
+  savedMeals: ["saved-meals"] as const,
+};

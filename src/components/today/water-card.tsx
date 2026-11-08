@@ -1,5 +1,9 @@
 "use client";
 import { Droplet, Undo2 } from "lucide-react";
+import { useState } from "react";
+import { Sheet } from "@/components/ui/drawer";
+import { Input } from "@/components/ui/input";
+import { flOzToMl } from "@/lib/units";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Bar } from "@/components/ui/progress";
@@ -13,6 +17,8 @@ export function WaterCard({ date, units, goalMl }: { date: string; units: UnitSy
   const del = useDeleteWater();
   const total = (water.data ?? []).reduce((s, w) => s + w.ml, 0);
   const last = water.data?.[water.data.length - 1];
+  const [custom, setCustom] = useState(false);
+  const [amt, setAmt] = useState("");
   return (
     <Card className="p-4">
       <div className="flex items-center justify-between">
@@ -30,10 +36,29 @@ export function WaterCard({ date, units, goalMl }: { date: string; units: UnitSy
             {p.label}
           </Button>
         ))}
+        <Button variant="secondary" onClick={() => setCustom(true)}>Other</Button>
         <Button variant="ghost" size="icon" aria-label="Undo last water" disabled={!last} onClick={() => last && del.mutate(last)}>
           <Undo2 aria-hidden />
         </Button>
       </div>
+      <Sheet open={custom} onOpenChange={setCustom} title="Add water">
+        <form
+          className="flex gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            const n = Number(amt.replace(",", "."));
+            if (!(n > 0)) return;
+            const ml = Math.round(units === "imperial" ? flOzToMl(n) : n);
+            if (ml < 1 || ml > 5000) return;
+            add.mutate({ id: uuid(), date, ml });
+            setAmt("");
+            setCustom(false);
+          }}
+        >
+          <Input aria-label={units === "imperial" ? "Fluid ounces" : "Millilitres"} inputMode="decimal" value={amt} onChange={(e) => setAmt(e.target.value)} placeholder={units === "imperial" ? "fl oz" : "ml"} autoFocus />
+          <Button type="submit">Add</Button>
+        </form>
+      </Sheet>
     </Card>
   );
 }

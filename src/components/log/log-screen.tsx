@@ -23,6 +23,8 @@ import type { NormalizedFood } from "@/lib/schemas/food";
 import type { UnitSystem } from "@/lib/units";
 import { haptic, uuid } from "@/lib/utils";
 import { FoodRow, RowList, SectionLabel } from "./food-rows";
+import { useSavedMeals, type SavedMeal } from "@/lib/data/recipes";
+import { useLogSavedMeal } from "@/components/recipes/recipes-screen";
 
 type Tab = "recent" | "frequent" | "favorites" | "mine";
 
@@ -62,6 +64,23 @@ export function LogScreen() {
   const add = useAddEntries();
   const del = useDeleteEntry();
   const fav = useToggleFavorite();
+  const savedMeals = useSavedMeals();
+  const logSaved = useLogSavedMeal();
+  const logMeal = (m: SavedMeal) => {
+    logSaved(m, date, defaultMeal);
+    setAdded((n) => n + 1);
+  };
+  const mealRow = (m: SavedMeal) => (
+    <FoodRow
+      key={m.id}
+      name={m.name}
+      sub={`Saved meal · ${m.saved_meal_items.length} items`}
+      kcal={m.saved_meal_items.reduce((a, i) => a + Number(i.kcal), 0)}
+      onSelect={() => logMeal(m)}
+      onQuickAdd={() => logMeal(m)}
+      quickLabel={`Log saved meal ${m.name}`}
+    />
+  );
 
   // Open a specific food directly (?food=<id>, e.g. after creating a custom food or scanning).
   const foodParam = params.get("food");
@@ -155,6 +174,11 @@ export function LogScreen() {
     const localKeys = new Set((local.data ?? []).filter((f) => f.source_id).map((f) => `${f.source}:${f.source_id}`));
     return (online.data?.results ?? []).filter((f) => !localKeys.has(`${f.source}:${f.sourceId}`));
   }, [online.data, local.data, searching]);
+
+  const savedMatches = useMemo(
+    () => (searching ? (savedMeals.data ?? []).filter((m) => matchScore(query, m.name) > 0).slice(0, 5) : []),
+    [savedMeals.data, query, searching],
+  );
 
   const tabList = useMemo(() => {
     const r = recents.data ?? [];
@@ -257,12 +281,21 @@ export function LogScreen() {
               )
             ) : myFoods.isPending ? (
               <ListSkeleton />
-            ) : myFoods.data?.length ? (
+            ) : myFoods.data?.length || savedMeals.data?.length ? (
+              <>
+              {savedMeals.data?.length ? (
+                <>
+                  <SectionLabel>Saved meals</SectionLabel>
+                  <RowList>{savedMeals.data.map(mealRow)}</RowList>
+                  <SectionLabel>Foods & recipes</SectionLabel>
+                </>
+              ) : null}
               <RowList>
-                {myFoods.data.map((f) => (
+                {(myFoods.data ?? []).map((f) => (
                   <FoodRow key={f.id} name={f.name} sub={fmtSub(f.brand, f.source === "recipe" ? "Recipe" : per100Label(f))} kcal={null} onSelect={() => setPicking({ kind: "local", food: f, last: recentByFood.get(f.id)?.last ?? null })} />
                 ))}
               </RowList>
+              </>
             ) : (
               <Empty title="No custom foods yet" body="Create foods, recipes or your go-to meals and they'll live here." action={<Link className="font-semibold text-primary" href={`/foods/new?meal=${defaultMeal}&date=${date}`}>Create a food</Link>} />
             )}
@@ -278,6 +311,12 @@ export function LogScreen() {
                   <FoodRow key={r.key} name={r.name} sub={fmtSub(r.brand, describeAmount(r.last))} kcal={Number(r.last.kcal)} onPointerDown={() => prefetch(r.foodId)} onSelect={() => void openRecent(r)} onQuickAdd={() => quickLogRecent(r)} />
                 ))}
               </RowList>
+            </>
+          ) : null}
+          {savedMatches.length ? (
+            <>
+              <SectionLabel>Saved meals</SectionLabel>
+              <RowList>{savedMatches.map(mealRow)}</RowList>
             </>
           ) : null}
           <SectionLabel>Foods</SectionLabel>

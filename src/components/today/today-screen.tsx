@@ -23,6 +23,7 @@ import { MacroBars } from "./macro-bars";
 import { MealSection } from "./meal-section";
 import { WaterCard } from "./water-card";
 import { WeighIn } from "./weigh-in";
+import { CopyYesterday } from "./copy-yesterday";
 
 export function TodayScreen() {
   const { date, today, setDate, shift } = useSelectedDate();
@@ -105,10 +106,12 @@ export function TodayScreen() {
             </Link>
           </Card>
 
+          {day.entries.length === 0 ? <CopyYesterday date={date} /> : null}
+
           {isToday || todayWeight != null ? <WeighIn key={todayMetric?.id ?? "new"} date={date} units={units} today={todayMetric} trendKg={trendKg} /> : null}
 
           {mealNames.map((name, i) => (
-            <MealSection key={`${name}-${i}`} name={name} index={i} date={date} entries={byMeal[i] ?? []} onEdit={setEditing} onDelete={(e) => del.removeWithUndo(e)} />
+            <MealSection key={`${name}-${i}`} name={name} index={i} date={date} today={today} mealNames={mealNames} entries={byMeal[i] ?? []} onEdit={setEditing} onDelete={(e) => del.removeWithUndo(e)} />
           ))}
 
           <div id="water">
